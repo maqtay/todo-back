@@ -18,13 +18,15 @@ import (
 )
 
 func dbConn() (db *sql.DB)  {
+	dbPassword := godotEnvVariables("DB_Password")
+	dbUsername := godotEnvVariables("DB_USERNAME")
+	databaseName := godotEnvVariables("DB_NAME")
 
 	dbDriver := "mysql"
-	dbUsername := godotEnvVariables("DB_USER")
-	dbName := godotEnvVariables("DB_NAME")
-	dbPassword := godotEnvVariables("DB_Password")
-
-	db, err := sql.Open(dbDriver, dbUsername + ":" + dbPassword + "@/" + dbName)
+	dbUser := dbUsername
+	dbPass := dbPassword
+	dbName := databaseName
+	db, err := sql.Open(dbDriver, dbUser + ":" + dbPass + "@/" + dbName)
 	if err != nil {
 		panic(err.Error())
 	}
