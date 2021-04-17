@@ -24,14 +24,12 @@ var (
 
 func TestAdd(t *testing.T) {
 	e := echo.New()
-	req, err := http.NewRequest(http.MethodPost, "/addtodo",strings.NewReader(todoJSON))
+	req := httptest.NewRequest(http.MethodPost, "/addtodo",strings.NewReader(todoJSON))
 	req.Header.Set("Content-Type", "application/json")
-	if err != nil {
-		t.Errorf("The request could not be created because of: %v", err)
-	}
+
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-
+	h := &Add{mockDB}
 	res := rec.Result()
 	defer res.Body.Close()
 
@@ -55,14 +53,11 @@ func TestGetAll(t *testing.T) {
 
 func TestDeleteToDo(t *testing.T) {
 	e := echo.New()
-	req, err := http.NewRequest(http.MethodDelete, "/deletetodo", nil)
+	req:= httptest.NewRequest(http.MethodDelete, "/deletetodo", nil)
 	q := req.URL.Query()
 	q.Add("id", deleteTodoId)
 	req.URL.RawQuery = q.Encode()
 
-	if err != nil {
-		t.Errorf("The request could not be created because of: %v", err)
-	}
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
