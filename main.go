@@ -4,12 +4,9 @@ import (
 	"ToDo/models"
 	"database/sql"
 	"fmt"
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"log"
 	"net/http"
-	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -18,14 +15,11 @@ import (
 )
 
 func dbConn() (db *sql.DB)  {
-	dbPassword := godotEnvVariables("DB_Password")
-	dbUsername := godotEnvVariables("DB_USERNAME")
-	databaseName := godotEnvVariables("DB_NAME")
 
 	dbDriver := "mysql"
-	dbUser := dbUsername
-	dbPass := dbPassword
-	dbName := databaseName
+	dbUser := "root"
+	dbPass := "maqtay"
+	dbName := "todo-app"
 	db, err := sql.Open(dbDriver, dbUser + ":" + dbPass + "@/" + dbName)
 	if err != nil {
 		panic(err.Error())
@@ -51,15 +45,13 @@ func createTable() {
 func Add(c echo.Context) error {
 	db := dbConn()
 	todo := new(models.ToDo)
-	if err := c.Bind(todo); err != nil {
-		return err
-	}
+	todoText := c.FormValue("todo")
 	stmt, err := db.Prepare("INSERT INTO ToDoList(todo, createdDate) VALUES(?,?)")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer stmt.Close()
-	res, err2 := stmt.Exec(todo.Note, time.Now())
+	res, err2 := stmt.Exec(todoText, time.Now())
 	if err2 != nil {
 		panic(err2)
 	}
@@ -90,7 +82,7 @@ func DeleteToDo(e echo.Context) error {
 	db := dbConn()
 	id := e.QueryParams().Get("id")
 	if id == "" {
-		return e.JSON(http.StatusBadRequest, "Please, inser the correct paramaters!")
+		return e.JSON(http.StatusBadRequest, "Please, insert the correct paramaters!")
 	}
 	rmvDB, err := db.Prepare("DELETE FROM todoList WHERE id = ?")
 	if err != nil {
@@ -121,12 +113,4 @@ func main() {
 	e.DELETE("/deletetodo", DeleteToDo)
 
 	e.Logger.Fatal(e.Start(":5858"))
-}
-
-func godotEnvVariables(s string) string {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-	return os.Getenv(s)
 }
