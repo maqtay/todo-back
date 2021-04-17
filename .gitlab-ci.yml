@@ -8,7 +8,7 @@ building:
   only:
     refs:
       - master
-  image: todoback:latest
+  image: golang:latest
   stage: build
   script:
     - go mod download
@@ -21,7 +21,7 @@ testing:
   only:
     refs:
       - master
-  image: todoback:latest
+  image: golang:latest
   stage: test
   script:
     - go mod download
