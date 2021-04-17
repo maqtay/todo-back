@@ -18,7 +18,7 @@ services:
             - app-network
 
     todo-back:
-        image: "todo-back"
+        image: maktay/todoback
         build:
             context: .
             dockerfile: ./Dockerfile

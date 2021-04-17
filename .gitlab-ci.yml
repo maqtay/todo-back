@@ -1,0 +1,60 @@
+stages:
+  - build
+  - test
+  - dockerize
+  - deployment
+
+building:
+  only:
+    refs:
+      - master
+  image: todo-back:latest
+  stage: build
+  script:
+    - go mod download
+    - go build ./main.go
+  artifacts:
+    paths:
+      - ./main
+
+testing:
+  only:
+    refs:
+      - master
+  image: todo-back:latest
+  stage: test
+  script:
+    - go mod download
+    - go test
+
+docker-package:
+  only:
+    refs:
+      - master
+  image: docker:latest
+  stage: dockerize
+  services:
+    - name: docker:dind
+  before_script:
+    - docker login -u "$DOCKER_USERNAME" - "$DOCKER_PASSWORD" "$DOCKER_URL"
+  after_script:
+    - docker logout
+  script:
+    - echo $CI_COMMIT_SHORT_RSA
+    - docker build . -t $DOCKER_URL/$DOCKER_USERNAME/todoback:latest
+    - docker tag $DOCKER_URL/DOCKER_USERNAME/todoback:latest $DOCKER_URL/$DOCKER_USER/todoback:stable
+    - docker push $DOCKER_URL/DOCKER_USERNAME/todoback:latest
+    - docker push $DOCKER_URL/DOCKER_USERNAME/todoback:stable
+
+deploy-prod:
+  stage: deployment
+  before_script:
+    - apt get update -qq
+    - apt-get install -qq git
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIV_KEY")>
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh root@$SERVER_IP "docker stack deploy --compose-file docker-compose.yml todo-app"
