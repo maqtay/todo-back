@@ -20,8 +20,6 @@ Run your unit tests
 $ go test
 ```
 
-**Not ready yet**
-
 ## Run
 ```
 $ docker-compose up -d
