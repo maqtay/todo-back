@@ -15,12 +15,11 @@ import (
 )
 
 func dbConn() (db *sql.DB)  {
-
 	dbDriver := "mysql"
-	dbUser := "root"
-	dbPass := "maqtay"
-	dbName := "todo-app"
-	db, err := sql.Open(dbDriver, dbUser + ":" + dbPass + "@/" + dbName)
+	dbUser := "todo"
+	dbPass := "todoback"
+	dbName := "todoDB"
+	db, err := sql.Open(dbDriver, dbUser + ":" + dbPass + "@tcp(db:3306)/" + dbName)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -29,7 +28,11 @@ func dbConn() (db *sql.DB)  {
 
 func createTable() {
 	db := dbConn()
-
+	createDatabase := "CREATE DATABASE IF NOT EXISTS todoDB;"
+	_, err1 := db.Exec(createDatabase)
+	if err1 != nil {
+		panic(err1.Error())
+	}
 	sql := "CREATE TABLE IF NOT EXISTS `todolist` (" +
 		"  `id` int(11) NOT NULL AUTO_INCREMENT," +
 		"  `todo` text COLLATE utf8mb4_unicode_520_ci NOT NULL," +

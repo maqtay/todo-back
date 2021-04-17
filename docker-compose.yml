@@ -8,13 +8,12 @@ services:
             - "3307:3306"
         command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
         environment:
-            MYSQL_ROOT_USER: root
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: "todo-app"
-            MYSQL_USER: "root"
-            MYSQL_PASSWORD: "maqtay"
+            MYSQL_ROOT_PASSWORD: todoback
+            MYSQL_DATABASE: todoDB
+            MYSQL_USER: todo
+            MYSQL_PASSWORD: todoback
         volumes:
-            - ./db_data:/var/lib/mysql
+            - ../db_data:/var/lib/mysql
         networks:
             - app-network
 
