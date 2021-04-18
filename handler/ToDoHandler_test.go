@@ -12,6 +12,10 @@ import (
 	"testing"
 )
 
+type CreateToDo struct {
+	Note string `json:"note"`
+}
+
 func TestGetAll(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()

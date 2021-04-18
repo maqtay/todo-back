@@ -25,7 +25,8 @@ testing:
   stage: test
   script:
     - go mod download
-    - go test
+    - go test ToDo/services
+    - go test ToDo/handler
 
 docker-package:
   only:
