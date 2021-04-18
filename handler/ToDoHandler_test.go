@@ -12,26 +12,22 @@ import (
 	"testing"
 )
 
-type CreateToDo struct {
-	Note string `json:"note"`
-}
-
 func TestGetAll(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 
-	var todo []models.ToDo
-	todo = append(todo, models.ToDo{
+	var todos []models.ToDo
+	todos = append(todos, models.ToDo{
 		Id:        1,
 		Note:   "Hi Guys",
 	})
 
 	service := services.NewMockService(controller)
-	service.EXPECT().GetALl().Return(todo).Times(1)
+	service.EXPECT().GetAll().Return(todos).Times(1)
 	handler := TodoHandler{service}
 
-	todoJSON := `{"Id":1,"todo":"Hi Guys","Date":"2021-04-16 14:30:33.495523"}`
-
+	todoJSON := `[{"Id":1,"note":"Hi Guys","Date":""}]
+`
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/getalltodo", nil)
 	req.Header.Set(echo.HeaderAccept, echo.MIMEApplicationJSON)
@@ -40,7 +36,7 @@ func TestGetAll(t *testing.T) {
 
 	if assert.NoError(t, handler.GetAll(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Contains(t, rec.Body.String(), todoJSON)
+		assert.Equal(t, todoJSON, rec.Body.String())
 	}
 }
 
@@ -53,15 +49,15 @@ func TestAdd(t *testing.T) {
 		Id:        1,
 		Note:   "Hi Guys",
 	}
-	todoJSON := `{"Id":1,"todo":"Hi Guys","Date":"2021-04-16 14:30:33.495523"}`
+	todoJSON := `{"Id":1,"note":"Hi Guys","Date":""}
+`
 
 	service := services.NewMockService(controller)
 	service.EXPECT().Add("Hi Guys").Return(expected).Times(1)
 
 	handler := TodoHandler{service}
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/todos", strings.NewReader(requestAsString))
-	req.Header.Set(echo.HeaderAccept, echo.MIMEApplicationJSON)
+	req := httptest.NewRequest(http.MethodPost, "/addtodo", strings.NewReader(requestAsString))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)

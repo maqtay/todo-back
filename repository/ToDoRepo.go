@@ -12,7 +12,7 @@ import (
 type Repository interface {
 	GetAll() interface{}
 	Add(note string) interface{}
-	Delete(id int) interface{}
+	Delete(id int)
 }
 
 type ToDoStore struct {
@@ -41,12 +41,15 @@ func (ts *ToDoStore) GetAll() interface{} {
 }
 
 func (ts *ToDoStore) Add(note string) interface{} {
-	todo := new(models.ToDo)
-	stmt, err := ts.db.Prepare("INSERT INTO ToDoList(todo, createdDate) VALUES(?,?)")
+	todo := models.ToDo{
+		Note: note,
+	}
+
+	stmt, err := ts.db.PrepareContext(context.Background(),"INSERT INTO ToDoList(todo, createdDate) VALUES(?,?)")
 	if err != nil {
 		panic(err.Error())
 	}
-	res, err2 :=  stmt.Exec(note, time.Now())
+	res, err2 :=  stmt.Exec(todo.Note, time.Now())
 	if err2 != nil {
 		panic(err2.Error())
 	}
@@ -54,15 +57,10 @@ func (ts *ToDoStore) Add(note string) interface{} {
 	return todo
 }
 
-func (ts *ToDoStore) Delete(id int) interface{} {
+func (ts *ToDoStore) Delete(id int) {
 	rmvDB, err := ts.db.Prepare("DELETE FROM todolist WHERE id = ?")
 	if err != nil {
 		panic(err.Error())
 	}
-	res, _ := rmvDB.Exec(id)
-	i, err := res.RowsAffected()
-	if i == 0 {
-		return nil
-	}
-	return true
+	rmvDB.Exec(id)
 }

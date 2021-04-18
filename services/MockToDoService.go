@@ -16,7 +16,7 @@ type MockServiceMockRec struct {
 
 func NewMockService(controller *gomock.Controller) *MockService  {
 	mock := &MockService{controller: controller}
-	mock.recorder = &MockServiceMockRec{mock}
+	mock.recorder = &MockServiceMockRec{mock: mock}
 	return mock
 }
 
@@ -31,9 +31,9 @@ func (m *MockService) GetAll() interface{} {
 	return actual
 }
 
-func (recorder *MockServiceMockRec) GetALl() *gomock.Call {
+func (recorder *MockServiceMockRec) GetAll() *gomock.Call {
 	recorder.mock.controller.T.Helper()
-	return recorder.mock.controller.RecordCallWithMethodType(recorder.mock, "GetAll", reflect.TypeOf((*MockServiceMockRec)(nil).GetALl()))
+	return recorder.mock.controller.RecordCallWithMethodType(recorder.mock, "GetAll", reflect.TypeOf((*MockService)(nil).GetAll))
 }
 
 func (m *MockService) Add(note string) interface{} {
@@ -48,15 +48,12 @@ func (recorder *MockServiceMockRec) Add(note string) *gomock.Call  {
 	return recorder.mock.controller.RecordCallWithMethodType(recorder.mock, "Add", reflect.TypeOf((*MockService)(nil).Add), note)
 }
 
-func (m *MockService) Delete(id int) interface{}  {
+func (m *MockService) Delete(id int) {
 	m.controller.T.Helper()
-	ret := m.controller.Call(m, "Delete", id)
-	actual := ret[0].(interface{})
-	return actual
+	m.controller.Call(m, "Delete", id)
 }
 
 func (recorder *MockServiceMockRec) Delete(id int) *gomock.Call  {
 	recorder.mock.controller.T.Helper()
 	return recorder.mock.controller.RecordCallWithMethodType(recorder.mock, "Delete", reflect.TypeOf((*MockService)(nil).Delete), id)
 }
-

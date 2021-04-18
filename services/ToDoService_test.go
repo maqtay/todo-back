@@ -15,10 +15,10 @@ func TestGetAll(t *testing.T)  {
 	var todos []models.ToDo
 	todos = append(todos, models.ToDo{
 		Id: 1,
-		Note: "Hi Guys!",
+		Note: "Hi Guys",
 	})
 	repo := repository.NewMockRepo(controller)
-	repo.EXPECT().GetALl().Return(todos).Times(1)
+	repo.EXPECT().GetAll().Return(todos).Times(1)
 	service := ToDoService{repo}
 
 	getall := service.GetAll().([]models.ToDo)
@@ -45,12 +45,12 @@ func TestAdd(t *testing.T) {
 	assert.NotNil(t, createdTodo)
 	todo := createdTodo.(models.ToDo)
 	assert.Equal(t, 1, todo.Id)
-	assert.Equal(t, "Buy some milk", todo.Note)
+	assert.Equal(t, "Hi Guys", todo.Note)
 }
 
 func TestDelete(t *testing.T) {
 	controller := gomock.NewController(t)
-
+	defer controller.Finish()
 	repo := repository.NewMockRepo(controller)
 	repo.EXPECT().Delete(1).Times(1)
 

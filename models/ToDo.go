@@ -2,6 +2,6 @@ package models
 
 type ToDo struct {
 	Id   int
-	Note string `json:"todo,omitempty"`
+	Note string `json:"note"`
 	Date string
 }

@@ -36,7 +36,8 @@ func (handler TodoHandler) Add(c echo.Context) error {
 }
 
 func (handler TodoHandler) Delete(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+	idStr := c.QueryParams().Get("id")
+	id, _ := strconv.Atoi(idStr)
 	handler.service.Delete(id)
 
 	return c.JSON(http.StatusOK, "")
