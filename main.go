@@ -1,33 +1,34 @@
 package main
 
 import (
-	"ToDo/models"
+	"ToDo/handler"
+	"ToDo/repository"
+	"ToDo/services"
 	"database/sql"
-	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"net/http"
-	"time"
-
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/labstack/echo/v4"
 	_ "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/labstack/echo/v4/middleware"
 )
 
-func dbConn() (db *sql.DB)  {
+func dbConn() (db *sql.DB, err error)  {
 	dbDriver := "mysql"
 	dbUser := "todo"
 	dbPass := "todoback"
 	dbName := "todoDB"
-	db, err := sql.Open(dbDriver, dbUser + ":" + dbPass + "@tcp(db:3306)/" + dbName)
+	db, _ = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(db:3306)/"+dbName)
 	if err != nil {
 		panic(err.Error())
 	}
-	return db
+	return db, nil
 }
 
-func createTable() {
-	db := dbConn()
+func createTable() error{
+	db, err := dbConn()
+	if err != nil {
+
+	}
 	createDatabase := "CREATE DATABASE IF NOT EXISTS todoDB;"
 	_, err1 := db.Exec(createDatabase)
 	if err1 != nil {
@@ -39,69 +40,23 @@ func createTable() {
 		"  `createdDate` varchar(100) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL," +
 		"  PRIMARY KEY (`id`)" +
 		") ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci"
-	_, err := db.Exec(sql)
+	res, err := db.Exec(sql)
 	if err != nil {
 		panic(err.Error())
 	}
-}
-
-func Add(c echo.Context) error {
-	db := dbConn()
-	todo := new(models.ToDo)
-	todoText := c.FormValue("todo")
-	stmt, err := db.Prepare("INSERT INTO ToDoList(todo, createdDate) VALUES(?,?)")
-	if err != nil {
-		panic(err.Error())
+	_, err1 = res.RowsAffected()
+	if err1 != nil {
+		panic(err1.Error())
 	}
-	defer stmt.Close()
-	res, err2 := stmt.Exec(todoText, time.Now())
-	if err2 != nil {
-		panic(err2)
-	}
-	fmt.Println(res.LastInsertId())
-	return c.JSON(http.StatusCreated, todo.Note)
-}
-
-func GetAll(c echo.Context) error {
-	db := dbConn()
-	selDB, err := db.Query("SELECT * FROM todoList")
-	if err != nil {
-		panic(err.Error())
-	}
-	todo := models.ToDo{}
-	var todos []models.ToDo
-	for selDB.Next() {
-		err = selDB.Scan(&todo.Id, &todo.Note, &todo.Date)
-		todos = append(todos, todo)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-	defer db.Close()
-	return c.JSON(http.StatusOK, todos)
-}
-
-func DeleteToDo(e echo.Context) error {
-	db := dbConn()
-	id := e.QueryParams().Get("id")
-	if id == "" {
-		return e.JSON(http.StatusBadRequest, "Please, insert the correct paramaters!")
-	}
-	rmvDB, err := db.Prepare("DELETE FROM todoList WHERE id = ?")
-	if err != nil {
-		return e.JSON(http.StatusInternalServerError, err.Error())
-	}
-	res, _ := rmvDB.Exec(id)
-	i, err := res.RowsAffected()
-	if i == 0 {
-		return e.JSON(http.StatusInternalServerError, "Any field was not affected. Please try again with a different parameter.")
-	}
-	defer db.Close()
-	return e.JSON(http.StatusOK, "Todo has been deleted!")
+	return nil
 }
 
 func main() {
-	createTable()
+	err := createTable()
+	if err != nil {
+		return 
+	}
+
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -111,9 +66,18 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 	}))
 
-	e.POST("/addtodo", Add)
-	e.GET("/getalltodo", GetAll)
-	e.DELETE("/deletetodo", DeleteToDo)
+	db, err := dbConn()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	todoRepo := repository.NewToDoStore(db)
+	todoService := services.NewTodoService(todoRepo)
+	todohandler := handler.NewTodoHandler(todoService)
+
+	e.POST("/addtodo", todohandler.Add)
+	e.GET("/getalltodo", todohandler.GetAll)
+	e.DELETE("/delete", todohandler.Delete)
 
 	e.Logger.Fatal(e.Start(":5858"))
 }
