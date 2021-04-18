@@ -28,10 +28,10 @@ func (handler TodoHandler) GetAll(c echo.Context) error {
 
 func (handler TodoHandler) Add(c echo.Context) error {
 	t := new(models.ToDo)
+	t.Note = c.FormValue("todo")
 	if err := c.Bind(t); err != nil {
 		return c.JSON(http.StatusBadRequest, "")
 	}
-
 	return c.JSON(http.StatusCreated, handler.service.Add(t.Note))
 }
 

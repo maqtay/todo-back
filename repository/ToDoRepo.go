@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	_ "database/sql"
-	"fmt"
 	"time"
 )
 
@@ -49,11 +48,10 @@ func (ts *ToDoStore) Add(note string) interface{} {
 	if err != nil {
 		panic(err.Error())
 	}
-	res, err2 :=  stmt.Exec(todo.Note, time.Now())
+	_, err2 :=  stmt.Exec(todo.Note, time.Now())
 	if err2 != nil {
 		panic(err2.Error())
 	}
-	fmt.Println(res)
 	return todo
 }
 

@@ -17,7 +17,7 @@ func dbConn() (db *sql.DB, err error)  {
 	dbUser := "todo"
 	dbPass := "todoback"
 	dbName := "todoDB"
-	db, _ = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(db:3306)/"+dbName)
+	db, _ = sql.Open(dbDriver, dbUser+":"+dbPass+"@tcp(localhost:3306)/"+dbName)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -77,7 +77,7 @@ func main() {
 
 	e.POST("/addtodo", todohandler.Add)
 	e.GET("/getalltodo", todohandler.GetAll)
-	e.DELETE("/delete", todohandler.Delete)
+	e.DELETE("/deletetodo", todohandler.Delete)
 
 	e.Logger.Fatal(e.Start(":5858"))
 }
