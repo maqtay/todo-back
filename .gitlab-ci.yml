@@ -38,7 +38,7 @@ docker-package:
     - name: docker:dind
   before_script:
     - echo "$DOCKER_URL"
-    - docker login -u "$DOCKER_USERNAME" - "$DOCKER_PASSWORD" "$DOCKER_URL"
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" "$DOCKER_URL"
   after_script:
     - docker logout
   script:
