@@ -44,9 +44,9 @@ docker-package:
   script:
     - echo "Dockerize is starting for last commit"
     - docker build . -t $DOCKER_URL/$DOCKER_USERNAME/todoback:latest
-    - docker tag $DOCKER_URL/DOCKER_USERNAME/todoback:latest $DOCKER_URL/$DOCKER_USER/todoback:stable
-    - docker push $DOCKER_URL/DOCKER_USERNAME/todoback:latest
-    - docker push $DOCKER_URL/DOCKER_USERNAME/todoback:stable
+    - docker tag $DOCKER_URL/$DOCKER_USERNAME/todoback:latest $DOCKER_URL/$DOCKER_USERNAME/todoback:stable
+    - docker push $DOCKER_URL/$DOCKER_USERNAME/todoback:latest
+    - docker push $DOCKER_URL/$DOCKER_USERNAME/todoback:stable
 
 deploy-prod:
   stage: deployment
